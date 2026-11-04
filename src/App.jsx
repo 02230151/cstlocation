@@ -216,6 +216,7 @@ export default function App() {
       <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} /><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
       <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className={`tool ${baseMap === 'street' ? 'active' : ''}`} onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button><button className="tool" disabled title="Directions are unavailable because no campus routing data is configured">➤ &nbsp;Directions</button></div>
       <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div><button className="locate" onClick={showCampus}>⌖ &nbsp;Show CST campus</button></div>
+      <button className="floorplans-fab" onClick={() => setView('floorplans')} aria-label="Open floor plans"><span className="floorplans-fab-icon">▦</span><span>Explore floor plans</span><span className="floorplans-fab-arrow">↗</span></button>
       {selected && <BuildingDetailsPanel
         feature={selected}
         details={getBuildingDetails(selected.properties?.Name, selected.properties?.Use)}
@@ -228,11 +229,11 @@ export default function App() {
 }
 
 function AppHeader({ view, onChange }) {
-  return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button><button className={view === 'floorplans' ? 'selected' : ''} onClick={() => onChange('floorplans')}>▦ <span>Floor plans</span></button></nav></header>;
+  return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button></nav></header>;
 }
 
-function FloorPlans() {
-  const [buildingIndex, setBuildingIndex] = useState(0);
+function FloorPlans({ initialBuildingIndex = 0 }) {
+  const [buildingIndex, setBuildingIndex] = useState(initialBuildingIndex);
   const [floorIndex, setFloorIndex] = useState(0);
   const [query, setQuery] = useState('');
   const [activeRoom, setActiveRoom] = useState(null);
@@ -255,15 +256,15 @@ function FloorPlans() {
     <div className="plan-layout"><aside className="building-panel"><div className="panel-label">BUILDINGS <span>{floorPlanBuildings.length.toString().padStart(2,'0')}</span></div>{floorPlanBuildings.map((item,index)=><button className={`building-link ${index===buildingIndex?'chosen':''}`} key={item.name} onClick={()=>chooseBuilding(index)}><span className="building-glyph">{['⌂','▤','⌖','✳','▦','▧','▤','⌘','▱'][index]}</span><span className="building-link-copy"><strong>{item.name}</strong><small>{item.floors.length} {item.floors.length===1?'level':'levels'} <i>·</i> {item.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</small></span><b>›</b></button>)}</aside>
       <div className="plan-content"><div className="building-title"><div><div className="eyebrow">BUILDING OVERVIEW</div><h2>{activeBuilding.name}</h2>{activeBuilding.note&&<p>{activeBuilding.note}</p>}</div><span className="floor-badge">{activeBuilding.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</span></div>
         <div className="floor-tabs" role="tablist" aria-label="Select floor">{activeBuilding.floors.map((item,index)=><button role="tab" aria-selected={index===floorIndex} className={index===floorIndex?'active':''} key={item.name} onClick={()=>{setFloorIndex(index);setActiveRoom(null);}}>{item.name}</button>)}</div>
-        <div className="schematic"><div className="schematic-top"><div><span className="plan-dot"/> FLOOR LAYOUT <span className="plan-dash">/</span> {activeFloor.name.toUpperCase()}</div><span className="schematic-tag">SCHEMATIC DIRECTORY</span></div><div className="plan-board"><div className="plan-direction"><span>← LEFT SIDE</span><span>RIGHT SIDE →</span></div><div className="room-columns"><div className="room-column">{roomsFor('left').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div><div className="room-column">{roomsFor('right').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div></div>{roomsFor('center').length>0&&<div className="center-rooms">{roomsFor('center').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div>}</div><div className="schematic-foot"><span>ROOMS & FACILITIES</span><span>{activeFloor.rooms.length.toString().padStart(2,'0')} LISTED <i>·</i> NOT TO SCALE</span></div></div>
-        <div className="plan-bottom"><div className={`room-detail ${activeRoom?'has-room':''}`}><span className="detail-symbol">{activeRoom?'⌖':'＋'}</span><div>{activeRoom?<><small>SELECTED SPACE <i>·</i> {activeRoom.building} <i>·</i> {activeRoom.floor}</small><strong>{activeRoom.name}</strong>{activeRoom.note&&<p>{activeRoom.note}</p>}</>:<><small>ROOM DETAILS</small><strong>Select a room to see more</strong><p>Choose any tile in the floor layout.</p></>}</div></div><div className="floor-note">{activeFloor.note?<><span>i</span>{activeFloor.note}</>:<> <span>i</span>Layout is a visual directory based on the provided side and adjacency descriptions.</>}</div></div>
+        <div className="schematic"><div className="schematic-top"><div><span className="plan-dot"/> FLOOR LAYOUT <span className="plan-dash">/</span> {activeFloor.name.toUpperCase()}</div><span className="schematic-tag">SCHEMATIC DIRECTORY</span></div><div className="plan-board"><div className="plan-direction"><span>← LEFT SIDE</span><span>RIGHT SIDE →</span></div>{(roomsFor('left').length>0||roomsFor('right').length>0)&&<div className="room-columns"><div className="room-column">{roomsFor('left').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div><div className="room-column">{roomsFor('right').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div></div>}{roomsFor('center').length>0&&<div className={`center-rooms ${(roomsFor('left').length||roomsFor('right').length)?'':'center-only'}`}>{roomsFor('center').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div>}</div><div className="schematic-foot"><span>ROOMS & FACILITIES</span><span>{activeFloor.rooms.length.toString().padStart(2,'0')} LISTED <i>·</i> NOT TO SCALE</span></div></div>
+        <div className="plan-bottom"><div className={`room-detail ${activeRoom?'has-room':''}`}><span className="detail-symbol">{activeRoom?'⌖':'＋'}</span><div>{activeRoom?<><small>SELECTED SPACE <i>·</i> {activeRoom.building} <i>·</i> {activeRoom.floor}</small><strong>{activeRoom.name}</strong>{activeRoom.description&&<p>{activeRoom.description}</p>}{activeRoom.note&&<p className="room-location-note">{activeRoom.note}</p>}</>:<><small>ROOM DETAILS</small><strong>Select a room to see more</strong><p>Choose any tile in the floor layout.</p></>}</div></div><div className="floor-note">{activeFloor.note?<><span>i</span>{activeFloor.note}</>:<> <span>i</span>Layout is a visual directory based on the provided side and adjacency descriptions.</>}</div></div>
       </div>
     </div>
   </section>;
 }
 
 function RoomTile({ item, index, active, onClick }) {
-  return <button className={`room-tile ${active?'active':''}`} onClick={()=>onClick(item)} style={{'--tile-order':index}}><span className="room-num">{String(index+1).padStart(2,'0')}</span><strong>{item.name}</strong><span className="tile-arrow">↗</span></button>;
+  return <button className={`room-tile ${active?'active':''}`} onClick={()=>onClick(item)} style={{'--tile-order':index}}><span className="room-num">{String(index+1).padStart(2,'0')}</span><span className="room-tile-copy"><strong>{item.name}</strong>{item.description&&<span className="room-description">{item.description}</span>}</span><span className="tile-arrow">↗</span></button>;
 }
 
 function SearchBox({ value, onChange, className, onSubmit }) {
@@ -290,10 +291,14 @@ function BuildingDetailsPanel({ feature, details, photo, onPhotoChange, onClose 
         <h4>{item.name}</h4>
         {item.zones.length ? <div className="floor-zones">{item.zones.map((itemZone) => <div className="floor-zone" key={itemZone.side}>
           <span className="zone-label">{itemZone.side}</span>
-          <div className="room-grid">{itemZone.rooms.map((room) => <span className="room-block" key={room}>{room}</span>)}</div>
+          <div className="room-grid">{itemZone.rooms.map((room) => <RoomBlock key={room} name={room}/>)}</div>
         </div>)}</div> : <p className="plan-missing">Floor or room details were not included in the supplied notes.</p>}
       </article>)}</div> : <div className="plan-empty"><strong>Floor plan details to add</strong><span>Add the floor names, room numbers, and left/right or section layout here.</span></div>}
-      {details.areaFacilities && <div className="area-facilities"><h4>Facilities noted near the football ground</h4><p>Floor and host-building assignments were not specified.</p><div className="room-grid">{details.areaFacilities.map((item) => <span className="room-block" key={item}>{item}</span>)}</div></div>}
+      {details.areaFacilities && <div className="area-facilities"><h4>Facilities noted near the football ground</h4><p>Floor and host-building assignments were not specified.</p><div className="room-grid">{details.areaFacilities.map((item) => <RoomBlock key={item} name={item}/>)}</div></div>}
     </section>
   </aside>;
+}
+
+function RoomBlock({ name }) {
+  return <span className="room-block"><strong>{name}</strong></span>;
 }

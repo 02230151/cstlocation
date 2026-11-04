@@ -1,6 +1,45 @@
-const room = (name, side = 'center', note = '') => ({ name, side, note });
+const room = (name, side = 'center', note = '') => ({ name, side, note, description: describeSpace(name) });
 const floor = (name, rooms, note = '') => ({ name, rooms, note });
 const building = (name, floors, note = '') => ({ name, floors, note });
+
+export function describeSpace(name) {
+  const label = name.toLowerCase();
+  if (/cafeteria/.test(label)) return 'A dining space for meals and refreshments for students and staff.';
+  if (/civil engineering department/.test(label)) return 'Home to Civil Engineering teaching, academic support, and departmental activities.';
+  if (/ict and statistics department/.test(label)) return 'Supports teaching and academic work in information and communications technology and statistics.';
+  if (/instrumentation and control/.test(label)) return 'Supports teaching and practical work in instrumentation, measurement, and control engineering.';
+  if (/science and humanities/.test(label)) return 'Supports science and humanities teaching and related academic activities.';
+  if (/electrical engineering department/.test(label)) return 'Home to Electrical Engineering teaching, academic support, and departmental activities.';
+  if (/administrative section/.test(label)) return 'The college’s central administrative offices and student-facing services.';
+  if (/president.s office/.test(label)) return 'The President’s office for college leadership and institutional administration.';
+  if (/integrity hall/.test(label)) return 'A campus hall for meetings, events, and institutional activities.';
+  if (/prayer hall/.test(label)) return 'A quiet space for prayer and reflection, locally known as Chue Khang.';
+  if (/^(cr|it\d|lt\d)/i.test(name)) return 'A classroom for lectures, tutorials, and collaborative learning.';
+  if (/drawing studio/.test(label)) return 'A studio workspace for architecture students to develop, draft, and review design projects.';
+  if (/structure timber|carpentry/.test(label)) return 'Supports practical work with timber, including basic fabrication and material testing.';
+  if (/star\s*c/.test(label)) return 'A specialist lab for supervised practical work and technical projects.';
+  if (/rock mechanics/.test(label)) return 'Supports the study and testing of rock properties for civil and geotechnical engineering.';
+  if (/soil mechanics/.test(label)) return 'Used for soil classification and geotechnical tests that support civil engineering study.';
+  if (/material testing/.test(label)) return 'Provides practical testing of construction materials and their engineering properties.';
+  if (/power electronics/.test(label)) return 'For practical study of power conversion, electronic drives, and control systems.';
+  if (/electrical machine/.test(label)) return 'Supports experiments with electrical machines, measurement, and instrumentation.';
+  if (/electrical workshop|switch gear|protection/.test(label)) return 'For hands-on electrical installation, equipment testing, and protection studies.';
+  if (/electronics|microprocessor|microcontroller|ece communication|\becd\b/.test(label)) return 'Supports practical electronics, embedded systems, and communication engineering work.';
+  if (/hydraulics|fluid mechanics/.test(label)) return 'For experiments in fluid flow, hydraulic systems, and related engineering principles.';
+  if (/pneumatic/.test(label)) return 'For practical study of pneumatic components, circuits, and automation.';
+  if (/chemistry/.test(label)) return 'For supervised experiments in chemical analysis, reactions, and laboratory methods.';
+  if (/physics/.test(label)) return 'Supports practical investigations of core physics concepts and measurements.';
+  if (/environmental/.test(label)) return 'For practical work in environmental sampling, analysis, and monitoring.';
+  if (/survey/.test(label)) return 'Supports field and laboratory practice in surveying and measurement.';
+  if (/construction/.test(label)) return 'For practical construction methods, materials, and civil engineering exercises.';
+  if (/engineering mechanics/.test(label)) return 'Supports practical learning in forces, motion, and engineering mechanics.';
+  if (/robotics/.test(label)) return 'For hands-on work with robotic systems, sensors, and automation.';
+  if (/digital electronics/.test(label)) return 'For experiments with digital logic, circuits, and electronic systems.';
+  if (/programming|software|database|data science|simulation|nlp|oss lab|byod/.test(label)) return 'Supports practical computing, software development, and project-based learning.';
+  if (/\blab(oratory)?\b|workshop/.test(label)) return 'A specialist space for supervised practical work, experiments, and technical projects.';
+  if (/team work hall|innovation hall|conference hall/.test(label)) return 'A shared space for teamwork, presentations, and collaborative academic activities.';
+  return '';
+}
 
 export const floorPlanBuildings = [
   building('Football ground area', [floor('Grounds & nearby', [
@@ -13,7 +52,7 @@ export const floorPlanBuildings = [
   ], 'Laboratories and workshops near the football ground. Floor levels were not specified.')], 'Near the football ground'),
   building('Library Building', [
     floor('Second floor', [room('Training Centre', 'left'), room('Student Service Center', 'left'), room('SSO office', 'right')]),
-    floor('Third floor', ['Microgrid lab', 'DS04', 'DS05', 'Drawing studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'].map((name) => room(name, 'center'))),
+    floor('Third floor', ['Microgrid lab', 'Drawing Studio 04', 'Drawing Studio 05', 'Drawing Studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'].map((name) => room(name, 'center'))),
     floor('Fourth floor', [room('Drawing studio 03', 'left'), room('Architecture department', 'right')]),
   ]),
   building('Near football post', [floor('Nearby facilities', [room('Stationarykdee', 'left'), room('LT01', 'center'), room('ECE laboratory', 'right')], 'Floor levels were not specified.')]),
