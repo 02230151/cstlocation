@@ -1,0 +1,78 @@
+const floor = (name, zones) => ({ name, zones });
+const zone = (side, rooms) => ({ side, rooms });
+
+export const buildingDetails = {
+  'library': {
+    description: 'A campus library building that also contains student services, training, and academic spaces.',
+    floors: [
+      floor('Ground and first floors', []),
+      floor('Second floor', [zone('Rooms listed', ['Training Centre', 'Student Service Center', 'SSO Office'])]),
+      floor('Third floor', [zone('Rooms listed', ['Microgrid Lab', 'DS04', 'DS05', 'Drawing Studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'])]),
+      floor('Fourth floor', [zone('Rooms listed', ['Drawing Studio 03', 'Architecture Department'])]),
+    ],
+  },
+  'classroom': {
+    description: 'The Classroom Block provides general teaching rooms and the Engineering Mechanics Laboratory.',
+    floors: [
+      floor('Ground floor', [
+        zone('Left side', ['CR01', 'CR02', 'CR03', 'CR04', 'CR05', 'CR06']),
+        zone('Right side', ['CR07', 'CR08', 'CR09']),
+      ]),
+      floor('First floor', [
+        zone('Right side', ['CR10', 'CR11', 'CR12', 'CR13']),
+        zone('Beside CR13', ['Engineering Mechanics Laboratory']),
+        zone('Above the CR02–CR06 section', ['Team Work Hall']),
+      ]),
+    ],
+  },
+  'it building': {
+    description: 'A three-floor academic building for information technology classes, laboratories, research, and collaboration.',
+    floors: [
+      floor('Ground floor', [
+        zone('Right side', ['IT01', 'IT02', 'IT03', 'Programming Labs 2 and 3', 'Simulation Lab', 'BYOD Lab']),
+        zone('Left side', ['Programming Lab 1', 'InnoTech Hall']),
+      ]),
+      floor('First floor', [
+        zone('Right side', ['IT04', 'IT05', 'Data Science Lab', 'OSS Lab', 'Software Lab', 'Database Lab']),
+        zone('Left side', ['NLP Lab', 'IT HOD Office']),
+      ]),
+      floor('Second floor', [zone('Rooms listed', ['IT06', 'Tech Innovation Hall', 'Tech Conference Halls', 'IT Lab Technician’s Office'])]),
+    ],
+  },
+  'fab-lab': {
+    description: 'A specialist laboratory building with fabrication, electronics, robotics, and engineering teaching facilities.',
+    floors: [
+      floor('Ground floor', [zone('Rooms listed', ['Fab Lab', 'ECE Communication Lab', 'ECD Lab'])]),
+      floor('First floor', []),
+      floor('Second floor', [zone('Rooms listed', ['Switch Gear and Protection Lab', 'Staff Room', 'Robotics Lab', 'Microprocessor and Microcontroller Lab', 'Hydraulics and Pneumatics Lab', 'Digital Electronics Lab'])]),
+    ],
+  },
+  'new lab': {
+    description: 'A laboratory building with chemistry, physics, fluid mechanics, environmental, and surveying facilities.',
+    floors: [
+      floor('Ground floor', [zone('Right side', ['Survey Lab']), zone('Left side', ['Chemistry Lab 02'])]),
+      floor('First floor', []),
+      floor('Second floor', [zone('Right side', ['Physics Lab']), zone('Left side', ['Fluid Mechanics Lab'])]),
+      floor('Third floor', [zone('Left side', ['Environmental Lab']), zone('Right side', ['Chemistry Lab 01'])]),
+    ],
+  },
+  'lt 2 & 3': {
+    description: 'The LT Block contains two adjacent lecture rooms. The supplied notes do not specify their floor.',
+    floors: [floor('Floor not specified', [zone('Left side', ['LT02']), zone('Right side', ['LT03'])])],
+  },
+  'lab': {
+    description: 'The map marks this as a laboratory building. Supplied notes list additional laboratories in the area near the football ground, but do not identify their host building or floors.',
+    areaFacilities: ['Structure Timber Testing', 'StarC Lab', 'Rock Mechanics Lab', 'Power Electronics and Control System Laboratory', 'Hydraulics and Plumbing Lab', 'ME Workshop', 'Electrical Workshop Testing Lab', 'Electrical Machine and Instrumentation Laboratory', 'Construction Lab', 'Civil Engineering Soil Mechanics Lab', 'Civil Engineering Material Testing Lab', 'Carpentry Workshop'],
+  },
+};
+
+export function getBuildingDetails(name = '', use = '') {
+  const key = name.trim().toLowerCase();
+  const supplied = buildingDetails[key];
+  if (supplied) return supplied;
+  const kind = use && use !== 'Other' ? use : 'campus facility';
+  return {
+    description: `${name || 'This building'} is listed on the CST campus map as a ${kind.toLowerCase()}. Room-by-room and floor information has not been added yet.`,
+    floors: [],
+  };
+}
