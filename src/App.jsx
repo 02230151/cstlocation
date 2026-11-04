@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import { allPlanRooms, floorPlanBuildings } from './floorPlanData.js';
+import { getBuildingDetails } from './buildingDetails.js';
 
 const categories = ['All places', 'Classroom', 'Laboratory', 'Office', 'Library', 'Hostel', 'Other'];
 const categoryPatterns = {
@@ -20,12 +21,11 @@ const layerFiles = {
 
 async function loadLayer(filename) {
   const response = await fetch(`${import.meta.env.BASE_URL}layers/${filename}`);
-  if (!response.ok) throw new Error(`Could not load ${filename}`);
+  if (!response.ok) throw new Error(`Could not load ${filename} (${response.status})`);
   const source = await response.text();
   const json = source.slice(source.indexOf('=') + 1).trim().replace(/;\s*$/, '');
   return JSON.parse(json);
 }
-
 function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>;
 }
@@ -42,6 +42,10 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [baseMap, setBaseMap] = useState('satellite');
   const [view, setView] = useState('map');
+  const [photos, setPhotos] = useState({});
+  const photoUrls = useRef([]);
+
+  useEffect(() => () => photoUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,9 +131,7 @@ export default function App() {
       style: { color: '#6f3d26', weight: 1.3, fillColor: '#a85f38', fillOpacity: 0.89 },
       onEachFeature: (feature, polygon) => {
         const name = feature.properties?.Name || 'Building';
-        const use = feature.properties?.Use || 'Campus facility';
         polygon.bindTooltip(name, { permanent: false, direction: 'center', className: 'building-label', opacity: 0.97 });
-        polygon.bindPopup(`<strong>${escapeHtml(name)}</strong><br/><span>${escapeHtml(use)}</span>`);
         polygon.on('click', () => setSelected(feature));
       },
     }).addTo(campusMap);
@@ -196,6 +198,14 @@ export default function App() {
     if (visibleBuildings[0]) chooseBuilding(visibleBuildings[0]);
   }
 
+  function addBuildingPhoto(event) {
+    const file = event.target.files?.[0];
+    if (!file || !selected) return;
+    const url = URL.createObjectURL(file);
+    photoUrls.current.push(url);
+    setPhotos((current) => ({ ...current, [selected.properties._key]: url }));
+  }
+
   if (view === 'floorplans') return <main className="app floor-app"><AppHeader view={view} onChange={setView}/><FloorPlans/></main>;
   if (loadError) return <main className="load-state"><AppHeader view={view} onChange={setView}/><h1>Could not load the CST map</h1><p>{loadError}</p><p>Check that the <code>public/layers</code> folder is beside this app's source.</p></main>;
   if (!layers) return <main className="load-state"><AppHeader view={view} onChange={setView}/><div className="loader-mark">⌖</div><strong>Loading CST campus map…</strong><span>Preparing campus buildings and paths</span></main>;
@@ -206,6 +216,13 @@ export default function App() {
       <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} /><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
       <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className={`tool ${baseMap === 'street' ? 'active' : ''}`} onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button><button className="tool" disabled title="Directions are unavailable because no campus routing data is configured">➤ &nbsp;Directions</button></div>
       <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div><button className="locate" onClick={showCampus}>⌖ &nbsp;Show CST campus</button></div>
+      {selected && <BuildingDetailsPanel
+        feature={selected}
+        details={getBuildingDetails(selected.properties?.Name, selected.properties?.Use)}
+        photo={photos[selected.properties._key]}
+        onPhotoChange={addBuildingPhoto}
+        onClose={() => setSelected(null)}
+      />}
     </section>
   </main>;
 }
@@ -253,6 +270,30 @@ function SearchBox({ value, onChange, className, onSubmit }) {
   return <label className={`search ${className}`}><SearchIcon/><input value={value} onChange={(event) => onChange(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSubmit?.(); }} placeholder="Search buildings or facilities…" aria-label="Search buildings or facilities" /></label>;
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+function BuildingDetailsPanel({ feature, details, photo, onPhotoChange, onClose }) {
+  const name = feature.properties?.Name || 'Campus building';
+  const use = feature.properties?.Use || 'Campus facility';
+  return <aside className="building-details" aria-label={`${name} details`}>
+    <header className="details-header">
+      <div><span className="details-kicker">CST building details</span><h2>{name}</h2><span className="details-type">{use}</span></div>
+      <button className="details-close" onClick={onClose} aria-label="Close building details">×</button>
+    </header>
+    <p className="details-description">{details.description}</p>
+    <section className="details-photo-section" aria-label="Building photograph">
+      {photo ? <img className="details-photo" src={photo} alt={`${name} building`} /> : <div className="photo-placeholder"><span className="photo-icon">▧</span><strong>Building photo</strong><span>Photo space reserved for this building</span></div>}
+      <label className="photo-upload">{photo ? 'Change photo' : 'Choose photo'}<input type="file" accept="image/*" onChange={onPhotoChange} /></label>
+      <span className="photo-note">Preview only · not saved after this session</span>
+    </section>
+    <section className="floor-plan-section">
+      <div className="details-section-heading"><div><span className="details-kicker">Room layout</span><h3>Floor plan</h3></div><span className="plan-badge">Text layout</span></div>
+      {details.floors?.length ? <div className="floor-list">{details.floors.map((item) => <article className="floor-card" key={item.name}>
+        <h4>{item.name}</h4>
+        {item.zones.length ? <div className="floor-zones">{item.zones.map((itemZone) => <div className="floor-zone" key={itemZone.side}>
+          <span className="zone-label">{itemZone.side}</span>
+          <div className="room-grid">{itemZone.rooms.map((room) => <span className="room-block" key={room}>{room}</span>)}</div>
+        </div>)}</div> : <p className="plan-missing">Floor or room details were not included in the supplied notes.</p>}
+      </article>)}</div> : <div className="plan-empty"><strong>Floor plan details to add</strong><span>Add the floor names, room numbers, and left/right or section layout here.</span></div>}
+      {details.areaFacilities && <div className="area-facilities"><h4>Facilities noted near the football ground</h4><p>Floor and host-building assignments were not specified.</p><div className="room-grid">{details.areaFacilities.map((item) => <span className="room-block" key={item}>{item}</span>)}</div></div>}
+    </section>
+  </aside>;
 }
