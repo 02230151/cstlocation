@@ -18,7 +18,7 @@ const layerFiles = {
 };
 
 async function loadLayer(filename) {
-  const response = await fetch(`/layers/${filename}`);
+  const response = await fetch(`${import.meta.env.BASE_URL}layers/${filename}`);
   if (!response.ok) throw new Error(`Could not load ${filename}`);
   const source = await response.text();
   const json = source.slice(source.indexOf('=') + 1).trim().replace(/;\s*$/, '');
