@@ -18,6 +18,14 @@ const layerFiles = {
   paths: 'Paths_6.js',
   openSpaces: 'Openspaces_7.js',
 };
+const buildingPhotos = {
+  'convention hall': 'convention-hall.jpg',
+};
+
+function getBuildingPhoto(name = '') {
+  const filename = buildingPhotos[name.trim().toLowerCase()];
+  return filename ? `${import.meta.env.BASE_URL}images/floorplans/${filename}` : '';
+}
 
 async function loadLayer(filename) {
   const response = await fetch(`${import.meta.env.BASE_URL}layers/${filename}`);
@@ -220,7 +228,8 @@ export default function App() {
       {selected && <BuildingDetailsPanel
         feature={selected}
         details={getBuildingDetails(selected.properties?.Name, selected.properties?.Use)}
-        photo={photos[selected.properties._key]}
+        photo={photos[selected.properties._key] || getBuildingPhoto(selected.properties?.Name)}
+        isPhotoPreview={Boolean(photos[selected.properties._key])}
         onPhotoChange={addBuildingPhoto}
         onClose={() => setSelected(null)}
       />}
@@ -291,7 +300,7 @@ function SearchBox({ value, onChange, className, onSubmit }) {
   return <label className={`search ${className}`}><SearchIcon/><input value={value} onChange={(event) => onChange(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') onSubmit?.(); }} placeholder="Search buildings or facilities…" aria-label="Search buildings or facilities" /></label>;
 }
 
-function BuildingDetailsPanel({ feature, details, photo, onPhotoChange, onClose }) {
+function BuildingDetailsPanel({ feature, details, photo, isPhotoPreview, onPhotoChange, onClose }) {
   const name = feature.properties?.Name || 'Campus building';
   const use = feature.properties?.Use || 'Campus facility';
   return <aside className="building-details" aria-label={`${name} details`}>
@@ -303,7 +312,7 @@ function BuildingDetailsPanel({ feature, details, photo, onPhotoChange, onClose 
     <section className="details-photo-section" aria-label="Building photograph">
       {photo ? <img className="details-photo" src={photo} alt={`${name} building`} /> : <div className="photo-placeholder"><span className="photo-icon">▧</span><strong>Building photo</strong><span>Photo space reserved for this building</span></div>}
       <label className="photo-upload">{photo ? 'Change photo' : 'Choose photo'}<input type="file" accept="image/*" onChange={onPhotoChange} /></label>
-      <span className="photo-note">Preview only · not saved after this session</span>
+      <span className="photo-note">{isPhotoPreview ? 'Preview only · not saved after this session' : photo ? 'Campus photo' : 'Preview only · not saved after this session'}</span>
     </section>
     <section className="floor-plan-section">
       <div className="details-section-heading"><div><span className="details-kicker">Room layout</span><h3>Floor plan</h3></div><span className="plan-badge">Text layout</span></div>
