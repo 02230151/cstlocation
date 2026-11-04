@@ -239,6 +239,12 @@ function FloorPlans({ initialBuildingIndex = 0 }) {
   const [activeRoom, setActiveRoom] = useState(null);
   const activeBuilding = floorPlanBuildings[buildingIndex];
   const activeFloor = activeBuilding.floors[floorIndex];
+  useEffect(() => {
+    if (!activeRoom) return undefined;
+    const closeOnEscape = (event) => { if (event.key === 'Escape') setActiveRoom(null); };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [activeRoom]);
   const matches = query.trim() ? allPlanRooms.filter((item) => `${item.name} ${item.building} ${item.floor}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8) : [];
   const setLocation = (item) => {
     const nextBuilding = floorPlanBuildings.findIndex((entry) => entry.name === item.building);
@@ -260,6 +266,20 @@ function FloorPlans({ initialBuildingIndex = 0 }) {
         <div className="plan-bottom"><div className={`room-detail ${activeRoom?'has-room':''}`}><span className="detail-symbol">{activeRoom?'⌖':'＋'}</span><div>{activeRoom?<><small>SELECTED SPACE <i>·</i> {activeRoom.building} <i>·</i> {activeRoom.floor}</small><strong>{activeRoom.name}</strong>{activeRoom.description&&<p>{activeRoom.description}</p>}{activeRoom.note&&<p className="room-location-note">{activeRoom.note}</p>}</>:<><small>ROOM DETAILS</small><strong>Select a room to see more</strong><p>Choose any tile in the floor layout.</p></>}</div></div><div className="floor-note">{activeFloor.note?<><span>i</span>{activeFloor.note}</>:<> <span>i</span>Layout is a visual directory based on the provided side and adjacency descriptions.</>}</div></div>
       </div>
     </div>
+    {activeRoom && <div className="room-photo-backdrop" onClick={() => setActiveRoom(null)}>
+      <section className="room-photo-dialog" role="dialog" aria-modal="true" aria-labelledby="room-photo-title" onClick={(event) => event.stopPropagation()}>
+        <button className="room-photo-close" onClick={() => setActiveRoom(null)} aria-label="Close room photo">×</button>
+        {activeRoom.image
+          ? <img className="room-photo-image" src={`${import.meta.env.BASE_URL}images/floorplans/${activeRoom.image}`} alt={`${activeRoom.name} at CST`} />
+          : <div className="room-photo-empty"><span>▧</span><strong>Photo not available yet</strong><small>This room does not have a photo in the supplied folder.</small></div>}
+        <div className="room-photo-caption">
+          <span className="details-kicker">{activeRoom.building} · {activeRoom.floor}{activeRoom.side ? ` · ${activeRoom.side === 'center' ? 'center area' : `${activeRoom.side} side`}` : ''}</span>
+          <h2 id="room-photo-title">{activeRoom.name}</h2>
+          {activeRoom.description && <p>{activeRoom.description}</p>}
+          {activeRoom.note && <p>{activeRoom.note}</p>}
+        </div>
+      </section>
+    </div>}
   </section>;
 }
 
