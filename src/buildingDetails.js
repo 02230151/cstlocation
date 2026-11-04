@@ -7,7 +7,7 @@ export const buildingDetails = {
     floors: [
       floor('Ground and first floors', []),
       floor('Second floor', [zone('Rooms listed', ['Training Centre', 'Student Service Center', 'SSO Office'])]),
-      floor('Third floor', [zone('Rooms listed', ['Microgrid Lab', 'DS04', 'DS05', 'Drawing Studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'])]),
+      floor('Third floor', [zone('Rooms listed', ['Microgrid Lab', 'Drawing Studio 04 (DS04)', 'Drawing Studio 05 (DS05)', 'Drawing Studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'])]),
       floor('Fourth floor', [zone('Rooms listed', ['Drawing Studio 03', 'Architecture Department'])]),
     ],
   },
@@ -54,6 +54,24 @@ export const buildingDetails = {
       floor('First floor', []),
       floor('Second floor', [zone('Right side', ['Physics Lab']), zone('Left side', ['Fluid Mechanics Lab'])]),
       floor('Third floor', [zone('Left side', ['Environmental Lab']), zone('Right side', ['Chemistry Lab 01'])]),
+    ],
+  },
+  'administrative block': {
+    description: 'The Academy Block brings together academic departments, college administration, and student facilities across four floors.',
+    floors: [
+      floor('Ground floor', [zone('Rooms listed', ['College cafeteria'])]),
+      floor('First floor', [
+        zone('Left side', ['ICT and Statistics Department']),
+        zone('Right side', ['Civil Engineering Department']),
+      ]),
+      floor('Second floor', [
+        zone('Left side', ['Science and Humanities Department']),
+        zone('Right side', ['Instrumentation and Control Engineering Department']),
+      ]),
+      floor('Third floor', [
+        zone('Left side', ['Electrical Engineering Department']),
+        zone('Right side', ['Administrative Section', "President's Office", 'Integrity Hall', 'Prayer Hall (Chue Khang)']),
+      ]),
     ],
   },
   'lt 2 & 3': {
