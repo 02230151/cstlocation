@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
+import { allPlanRooms, floorPlanBuildings } from './floorPlanData.js';
 import { getBuildingDetails } from './buildingDetails.js';
 
 const categories = ['All places', 'Classroom', 'Laboratory', 'Office', 'Library', 'Hostel', 'Other'];
@@ -40,6 +41,7 @@ export default function App() {
   const [category, setCategory] = useState('All places');
   const [selected, setSelected] = useState(null);
   const [baseMap, setBaseMap] = useState('satellite');
+  const [view, setView] = useState('map');
   const [photos, setPhotos] = useState({});
   const photoUrls = useRef([]);
 
@@ -204,10 +206,12 @@ export default function App() {
     setPhotos((current) => ({ ...current, [selected.properties._key]: url }));
   }
 
-  if (loadError) return <main className="load-state"><h1>Could not load the CST map</h1><p>{loadError}</p><p>Check that the <code>public/layers</code> folder is beside this app's source.</p></main>;
-  if (!layers) return <main className="load-state"><div className="loader-mark">⌖</div><strong>Loading CST campus map…</strong><span>Preparing campus buildings and paths</span></main>;
+  if (view === 'floorplans') return <main className="app floor-app"><AppHeader view={view} onChange={setView}/><FloorPlans/></main>;
+  if (loadError) return <main className="load-state"><AppHeader view={view} onChange={setView}/><h1>Could not load the CST map</h1><p>{loadError}</p><p>Check that the <code>public/layers</code> folder is beside this app's source.</p></main>;
+  if (!layers) return <main className="load-state"><AppHeader view={view} onChange={setView}/><div className="loader-mark">⌖</div><strong>Loading CST campus map…</strong><span>Preparing campus buildings and paths</span></main>;
 
   return <main className="app">
+    <AppHeader view={view} onChange={setView}/>
     <section className="map-shell" aria-label="Interactive CST campus map"><div className="map-canvas" ref={mapElement} />
       <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} /><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
       <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className={`tool ${baseMap === 'street' ? 'active' : ''}`} onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button><button className="tool" disabled title="Directions are unavailable because no campus routing data is configured">➤ &nbsp;Directions</button></div>
@@ -221,6 +225,45 @@ export default function App() {
       />}
     </section>
   </main>;
+}
+
+function AppHeader({ view, onChange }) {
+  return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button><button className={view === 'floorplans' ? 'selected' : ''} onClick={() => onChange('floorplans')}>▦ <span>Floor plans</span></button></nav></header>;
+}
+
+function FloorPlans() {
+  const [buildingIndex, setBuildingIndex] = useState(0);
+  const [floorIndex, setFloorIndex] = useState(0);
+  const [query, setQuery] = useState('');
+  const [activeRoom, setActiveRoom] = useState(null);
+  const activeBuilding = floorPlanBuildings[buildingIndex];
+  const activeFloor = activeBuilding.floors[floorIndex];
+  const matches = query.trim() ? allPlanRooms.filter((item) => `${item.name} ${item.building} ${item.floor}`.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8) : [];
+  const setLocation = (item) => {
+    const nextBuilding = floorPlanBuildings.findIndex((entry) => entry.name === item.building);
+    setBuildingIndex(nextBuilding);
+    setFloorIndex(floorPlanBuildings[nextBuilding].floors.findIndex((entry) => entry.name === item.floor));
+    setActiveRoom(item);
+    setQuery('');
+  };
+  const selectRoom = (item) => setActiveRoom({ ...item, building: activeBuilding.name, floor: activeFloor.name });
+  const chooseBuilding = (index) => { setBuildingIndex(index); setFloorIndex(0); setActiveRoom(null); };
+  const roomsFor = (side) => activeFloor.rooms.filter((item) => item.side === side);
+  return <section className="floor-page">
+    <div className="floor-heading"><div><div className="eyebrow"><span/> CAMPUS DIRECTORY</div><h1>Find your place.</h1><p>Explore buildings, floors, departments, classrooms and labs across CST.</p></div><div className="room-count"><strong>{allPlanRooms.length}</strong><span>mapped spaces</span></div></div>
+    <div className="plan-search-wrap"><SearchIcon/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a room, lab or building…" aria-label="Search rooms, labs or buildings"/>{query&&<button onClick={()=>setQuery('')} aria-label="Clear search">×</button>}{matches.length>0&&<div className="search-results">{matches.map((item)=><button key={`${item.building}-${item.floor}-${item.name}`} onClick={()=>setLocation(item)}><span className="result-icon">⌕</span><span><strong>{item.name}</strong><small>{item.building} <i>·</i> {item.floor}</small></span><b>↗</b></button>)}</div>}</div>
+    <div className="plan-layout"><aside className="building-panel"><div className="panel-label">BUILDINGS <span>{floorPlanBuildings.length.toString().padStart(2,'0')}</span></div>{floorPlanBuildings.map((item,index)=><button className={`building-link ${index===buildingIndex?'chosen':''}`} key={item.name} onClick={()=>chooseBuilding(index)}><span className="building-glyph">{['⌂','▤','⌖','✳','▦','▧','▤','⌘','▱'][index]}</span><span className="building-link-copy"><strong>{item.name}</strong><small>{item.floors.length} {item.floors.length===1?'level':'levels'} <i>·</i> {item.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</small></span><b>›</b></button>)}</aside>
+      <div className="plan-content"><div className="building-title"><div><div className="eyebrow">BUILDING OVERVIEW</div><h2>{activeBuilding.name}</h2>{activeBuilding.note&&<p>{activeBuilding.note}</p>}</div><span className="floor-badge">{activeBuilding.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</span></div>
+        <div className="floor-tabs" role="tablist" aria-label="Select floor">{activeBuilding.floors.map((item,index)=><button role="tab" aria-selected={index===floorIndex} className={index===floorIndex?'active':''} key={item.name} onClick={()=>{setFloorIndex(index);setActiveRoom(null);}}>{item.name}</button>)}</div>
+        <div className="schematic"><div className="schematic-top"><div><span className="plan-dot"/> FLOOR LAYOUT <span className="plan-dash">/</span> {activeFloor.name.toUpperCase()}</div><span className="schematic-tag">SCHEMATIC DIRECTORY</span></div><div className="plan-board"><div className="plan-direction"><span>← LEFT SIDE</span><span>RIGHT SIDE →</span></div><div className="room-columns"><div className="room-column">{roomsFor('left').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div><div className="room-column">{roomsFor('right').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div></div>{roomsFor('center').length>0&&<div className="center-rooms">{roomsFor('center').map((item,index)=><RoomTile key={item.name} item={item} index={index} active={activeRoom?.name===item.name} onClick={selectRoom}/>)}</div>}</div><div className="schematic-foot"><span>ROOMS & FACILITIES</span><span>{activeFloor.rooms.length.toString().padStart(2,'0')} LISTED <i>·</i> NOT TO SCALE</span></div></div>
+        <div className="plan-bottom"><div className={`room-detail ${activeRoom?'has-room':''}`}><span className="detail-symbol">{activeRoom?'⌖':'＋'}</span><div>{activeRoom?<><small>SELECTED SPACE <i>·</i> {activeRoom.building} <i>·</i> {activeRoom.floor}</small><strong>{activeRoom.name}</strong>{activeRoom.note&&<p>{activeRoom.note}</p>}</>:<><small>ROOM DETAILS</small><strong>Select a room to see more</strong><p>Choose any tile in the floor layout.</p></>}</div></div><div className="floor-note">{activeFloor.note?<><span>i</span>{activeFloor.note}</>:<> <span>i</span>Layout is a visual directory based on the provided side and adjacency descriptions.</>}</div></div>
+      </div>
+    </div>
+  </section>;
+}
+
+function RoomTile({ item, index, active, onClick }) {
+  return <button className={`room-tile ${active?'active':''}`} onClick={()=>onClick(item)} style={{'--tile-order':index}}><span className="room-num">{String(index+1).padStart(2,'0')}</span><strong>{item.name}</strong><span className="tile-arrow">↗</span></button>;
 }
 
 function SearchBox({ value, onChange, className, onSubmit }) {
