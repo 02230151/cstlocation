@@ -216,6 +216,7 @@ export default function App() {
       <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} /><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
       <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className={`tool ${baseMap === 'street' ? 'active' : ''}`} onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button><button className="tool" disabled title="Directions are unavailable because no campus routing data is configured">➤ &nbsp;Directions</button></div>
       <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div><button className="locate" onClick={showCampus}>⌖ &nbsp;Show CST campus</button></div>
+      <button className="floorplans-fab" onClick={() => setView('floorplans')} aria-label="Open floor plans"><span className="floorplans-fab-icon">▦</span><span>Explore floor plans</span><span className="floorplans-fab-arrow">↗</span></button>
       {selected && <BuildingDetailsPanel
         feature={selected}
         details={getBuildingDetails(selected.properties?.Name, selected.properties?.Use)}
@@ -228,7 +229,7 @@ export default function App() {
 }
 
 function AppHeader({ view, onChange }) {
-  return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button><button className={view === 'floorplans' ? 'selected' : ''} onClick={() => onChange('floorplans')}>▦ <span>Floor plans</span></button></nav></header>;
+  return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button></nav></header>;
 }
 
 function FloorPlans() {
