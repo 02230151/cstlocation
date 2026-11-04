@@ -20,6 +20,18 @@ const layerFiles = {
 };
 const buildingPhotos = {
   'convention hall': 'convention-hall.jpg',
+  'it building': 'it-building-pictures-it-building.jpg',
+  'administrative block': 'academyblock-images-academyblock-front-view.jpg',
+  classroom: 'classrooms-cr1.jpg',
+  library: 'library.jpg',
+  'architecture-studio': 'architecture-department.jpg',
+  guesthouse: 'guest-house.jpg',
+  'new lab': 'new-lab-building.jpg',
+  'fab-lab': 'fablab.jpg',
+  'indoor stadium': 'basketball-court.jpg',
+  'old chem lab': 'chemistry-lab-01-right.jpg',
+  carpentry: 'carpentry-workshop.jpg',
+  canteen: 'canteen.jpg',
 };
 
 function getBuildingPhoto(name = '') {
