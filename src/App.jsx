@@ -29,6 +29,33 @@ function SearchIcon() {
   return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 5 5"/></svg>;
 }
 
+function getBuildingCenter(feature) {
+  const coordinates = feature.geometry?.coordinates || [];
+  const points = [];
+  const collectPoints = (value) => {
+    if (!Array.isArray(value)) return;
+    if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
+      points.push(value);
+      return;
+    }
+    value.forEach(collectPoints);
+  };
+  collectPoints(coordinates);
+  if (!points.length) return null;
+  const [longitude, latitude] = points.reduce(([lngSum, latSum], [lng, lat]) => [lngSum + lng, latSum + lat], [0, 0]);
+  return [latitude / points.length, longitude / points.length];
+}
+
+function getCampusSection(feature, campusCenter) {
+  const center = getBuildingCenter(feature);
+  if (!center || !campusCenter) return 'Campus location';
+  const northSouth = center[0] - campusCenter.lat;
+  const eastWest = center[1] - campusCenter.lng;
+  const angle = (Math.atan2(eastWest, northSouth) * 180 / Math.PI + 360) % 360;
+  const directions = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+  return `${directions[Math.round(angle / 45) % 8]} side of campus`;
+}
+
 export default function App() {
   const mapElement = useRef(null);
   const map = useRef(null);
@@ -69,6 +96,7 @@ export default function App() {
     if (!layers || !mapElement.current || map.current) return undefined;
 
     const campusBounds = L.geoJSON(layers.boundary).getBounds();
+    const campusCenter = campusBounds.getCenter();
     const campusMap = L.map(mapElement.current, {
       zoomControl: false,
       preferCanvas: true,
@@ -127,7 +155,8 @@ export default function App() {
         const name = feature.properties?.Name || 'Building';
         const use = feature.properties?.Use || 'Campus facility';
         polygon.bindTooltip(name, { permanent: false, direction: 'center', className: 'building-label', opacity: 0.97 });
-        polygon.bindPopup(`<strong>${escapeHtml(name)}</strong><br/><span>${escapeHtml(use)}</span>`);
+        const section = getCampusSection(feature, campusCenter);
+        polygon.bindPopup(`<strong>${escapeHtml(name)}</strong><br/><span>${escapeHtml(use)}</span><br/><span class="building-section">Section: ${escapeHtml(section)}</span>`);
         polygon.on('click', () => setSelected(feature));
       },
     }).addTo(campusMap);
