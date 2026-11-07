@@ -136,14 +136,14 @@ export function describeSpace(name) {
 }
 
 export const floorPlanBuildings = [
-  building('Football ground area', [floor('Grounds & nearby', [
+  building('Lab Building', [floor('Grounds & nearby', [
     room('Structure timber testing', 'left'), room('STAR C lab', 'left'), room('Rock mechanics lab', 'left'),
     room('Power electronics and control system laboratory', 'left'), room('Hydraulics plumbing lab', 'left'),
     room('ME Workshop', 'left'), room('Electrical workshop testing lab', 'right'),
     room('Electrical machine and instrumentation laboratory', 'right'), room('Construction lab', 'right'),
     room('Civil Engineering lab — Soil Mechanics', 'right'), room('Civil Engineering lab — Material Testing', 'right'),
     room('Carpentry workshop', 'right'),
-  ], 'Laboratories and workshops near the football ground. Floor levels were not specified.')], 'Near the football ground'),
+  ], 'Laboratories and workshops near the football ground. Floor levels were not specified.')], 'Near the football ground.'),
   building('Library Building', [
     floor('Second floor', [room('Training Centre', 'left'), room('Student Service Center', 'left'), room('SSO office', 'right')]),
     floor('Third floor', ['Microgrid lab', 'Drawing Studio 04', 'Drawing Studio 05', 'Drawing Studio 02', 'CR14', 'CR15', 'CR16', 'CR17', 'CR18'].map((name) => room(name, 'center'))),
