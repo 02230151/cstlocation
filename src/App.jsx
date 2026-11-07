@@ -32,6 +32,13 @@ const buildingPhotos = {
   'old chem lab': 'chemistry-lab-01-right.jpg',
   carpentry: 'carpentry-workshop.jpg',
   canteen: 'canteen.jpg',
+  'rk-a': 'RKA.jpg',
+  'rk-b': 'RKB.jpg',
+  'ha-hb': 'hb.jpg',
+  'hc-hd': 'hc.jpg',
+  'he & mess': 'he.jpg',
+  hf: 'hf.jpg',
+  nk: 'nk.jpg',
 };
 
 function getBuildingPhoto(name = '') {

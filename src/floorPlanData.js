@@ -36,6 +36,16 @@ const roomPhotoSources = {
   'Hydraulics and pneumatics lab': 'Hydraulics_and_pneumatics_lab.jpg',
   'Digital electronics lab': 'Digital electronics lab.jpg',
   'Survey lab': 'Survey lab(right).jpg',
+  'RK-A Hostel': 'RKA.jpg',
+  'RK-B Hostel': 'RKB.jpg',
+  'HB Hostel': 'hb.jpg',
+  'HC Hostel': 'hc.jpg',
+  'HD Hostel': 'hd.jpg',
+  'HE Hostel': 'he.jpg',
+  'HF Hostel': 'hf.jpg',
+  'Hostel A': 'hostelA.jpg',
+  'NK Hostel': 'nk.jpg',
+  'Lhawang Hostel': 'lhawang.jpg',
   'Chemistry lab 02': 'Chemistry_lab_02_left.jpg',
   'Chemistry lab 01': 'Chemistry_lab_01_right.jpg',
   'Physics lab': 'Physics lab (right).jpg',
@@ -166,6 +176,13 @@ export const floorPlanBuildings = [
     floor('Second floor', [room('IT06', 'left'), room('Tech Innovation Hall', 'right'), room('Tech Conference Halls', 'right'), room("IT Lab Technician's Office", 'right')], 'Top floor.'),
   ], 'Above the Convention Hall, below the Classroom Block, and adjacent to the Administrative Block.'),
   building('LT Block', [floor('Classrooms', [room('LT02', 'left'), room('LT03', 'right')], 'The two classrooms are side by side. Floor level was not specified.')], 'Adjacent to the IT Building and below the Classroom Block.'),
+  building('Hostel Block', [
+    floor('Hostel photos', [
+      room('RK-A Hostel'), room('RK-B Hostel'), room('HB Hostel'), room('HC Hostel'),
+      room('HD Hostel'), room('HE Hostel'), room('HF Hostel'), room('NK Hostel'),
+      room('Hostel A'), room('Lhawang Hostel'),
+    ], 'These photos identify hostel buildings only; room locations and floor layouts were not provided.'),
+  ], 'Hostel buildings on the CST campus.'),
 ];
 
 export const allPlanRooms = floorPlanBuildings.flatMap((building) => building.floors.flatMap((level) => level.rooms.map((item) => ({ ...item, building: building.name, floor: level.name }))));
