@@ -21,6 +21,7 @@ const layerFiles = {
 const buildingPhotos = {
   'convention hall': 'convention-hall.jpg',
   'it building': 'it-building-pictures-it-building.jpg',
+  'lt 2 & 3': 'lt-2-3-building.png',
   'administrative block': 'academyblock-images-academyblock-front-view.jpg',
   classroom: 'classroom-block-courtyard.png',
   library: 'library.jpg',
@@ -51,11 +52,17 @@ function normalizeBuildingName(name = '') {
 }
 
 function matchesSearch(query, ...values) {
-  const searchTerm = query.trim().toLocaleLowerCase();
-  return Boolean(searchTerm) && values.some((value) => {
-    const firstWord = value.trim().toLocaleLowerCase().match(/^[a-z0-9]+/)?.[0] || '';
-    return firstWord.startsWith(searchTerm);
-  });
+  const terms = query.trim().toLocaleLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  if (!terms.length) return false;
+  const words = values.flatMap((value) => String(value || '').toLocaleLowerCase().split(/[^a-z0-9]+/).filter(Boolean));
+  const compactText = words.join('');
+  const compactQuery = terms.join('');
+  return compactText.includes(compactQuery) || terms.every((term) => words.some((word) => word.startsWith(term)));
+}
+
+function getRoomLocationLabel(room) {
+  const side = room.side === 'center' ? 'center area' : `${room.side} side`;
+  return `${room.building} · ${room.floor} · ${side}`;
 }
 
 function getRoomLocationDescription(room) {
@@ -90,6 +97,7 @@ export default function App() {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [baseMap, setBaseMap] = useState('satellite');
   const [view, setView] = useState('map');
+  const [floorPlanTarget, setFloorPlanTarget] = useState(null);
   const [photos, setPhotos] = useState({});
   const photoUrls = useRef([]);
 
@@ -111,13 +119,22 @@ export default function App() {
   const mapSearchResults = useMemo(() => {
     const query = search.trim().toLocaleLowerCase();
     if (!query) return [];
+    const matchingRooms = allPlanRooms.filter((room) => matchesSearch(query, room.name, room.building, room.floor));
+    const roomsByBuilding = matchingRooms.reduce((groups, room) => groups.set(room.building, [...(groups.get(room.building) || []), room]), new Map());
+    const roomResults = [...roomsByBuilding.entries()].map(([name, rooms]) => {
+      if (rooms.length === 1) return { type: 'room', ...rooms[0] };
+      const planBuilding = floorPlanBuildings.find((item) => item.name === name);
+      const feature = buildings.find((item) => normalizeBuildingName(item.properties?.Name) === normalizeBuildingName(name));
+      const description = feature
+        ? getBuildingDetails(feature.properties?.Name, feature.properties?.Use).description
+        : planBuilding?.note || `${name} contains ${rooms.length} matching places in the campus directory.`;
+      return { type: 'building-group', name, building: name, count: rooms.length, description, feature };
+    });
     const matchingBuildings = buildings
       .filter((feature) => matchesSearch(query, feature.properties?.Name || '', feature.properties?.Use || ''))
+      .filter((feature) => !roomResults.some((result) => normalizeBuildingName(result.building || result.name) === normalizeBuildingName(feature.properties?.Name)))
       .map((feature) => ({ type: 'building', name: feature.properties?.Name || 'Campus building', feature }));
-    const matchingRooms = allPlanRooms
-      .filter((room) => matchesSearch(query, room.name, room.building, room.floor))
-      .map((room) => ({ type: 'room', ...room }));
-    return [...matchingRooms, ...matchingBuildings].slice(0, 8);
+    return [...roomResults, ...matchingBuildings].slice(0, 8);
   }, [buildings, search]);
 
   const visibleBuildings = useMemo(() => buildings.filter((feature) => {
@@ -126,8 +143,8 @@ export default function App() {
     const query = search.trim().toLocaleLowerCase();
     const matchesQuery = !query
       || matchesSearch(query, name, use)
-      || mapSearchResults.some((result) => result.type === 'room'
-        && normalizeBuildingName(result.building) === normalizeBuildingName(name));
+      || mapSearchResults.some((result) => ['room', 'building-group'].includes(result.type)
+        && normalizeBuildingName(result.building || result.name) === normalizeBuildingName(name));
     const knownPatterns = Object.values(categoryPatterns);
     const matchesCategory = category === 'All places'
       || (category === 'Other' && !knownPatterns.some((pattern) => pattern.test(use)))
@@ -262,12 +279,18 @@ export default function App() {
   }
 
   function locateSearchResult(result) {
-    const buildingName = result.type === 'room' ? result.building : result.name;
+    const buildingName = result.type === 'room' ? result.building : result.building || result.name;
     const normalizedName = normalizeBuildingName(buildingName);
     const feature = result.type === 'building'
       ? result.feature
-      : buildings.find((item) => normalizeBuildingName(item.properties?.Name) === normalizedName);
-    if (!feature) return;
+      : result.feature || buildings.find((item) => normalizeBuildingName(item.properties?.Name) === normalizedName);
+    if (!feature) {
+      if (result.type === 'room' || result.type === 'building-group') {
+        setFloorPlanTarget(result.type === 'room' ? result : { type: 'building', building: buildingName });
+        setView('floorplans');
+      }
+      return;
+    }
 
     setCategory('All places');
     setSearch('');
@@ -287,13 +310,13 @@ export default function App() {
     setPhotos((current) => ({ ...current, [selected.properties._key]: url }));
   }
 
-  if (view === 'floorplans') return <main className="app floor-app"><AppHeader view={view} onChange={setView}/><FloorPlans/></main>;
+  if (view === 'floorplans') return <main className="app floor-app"><AppHeader view={view} onChange={setView}/><FloorPlans initialRoom={floorPlanTarget} onInitialRoomHandled={() => setFloorPlanTarget(null)}/></main>;
   if (loadError) return <main className="load-state"><AppHeader view={view} onChange={setView}/><h1>Could not load the CST map</h1><p>{loadError}</p><p>Check that the <code>public/layers</code> folder is beside this app's source.</p></main>;
   if (!layers) return <main className="load-state"><AppHeader view={view} onChange={setView}/><div className="loader-mark">⌖</div><strong>Loading CST campus map…</strong><span>Preparing campus buildings and paths</span></main>;
 
   return <main className="app">
     <section className="map-shell" aria-label="Interactive CST campus map"><div className="map-canvas" ref={mapElement} />
-      <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><div className="map-search-autocomplete"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} suggestionsId="map-search-results" hasSuggestions={Boolean(search.trim())} />{search.trim() && <div className="map-search-results" id="map-search-results" role="listbox">{mapSearchResults.length ? mapSearchResults.map((result) => <button type="button" role="option" key={result.type === 'room' ? `${result.building}-${result.floor}-${result.name}` : result.feature.properties._key} onClick={() => locateSearchResult(result)}><span className="result-icon">{result.type === 'room' ? '⌕' : '⌖'}</span><span><strong>{result.name}</strong><small>{result.type === 'room' ? `${result.building} · ${result.floor}` : result.feature.properties?.Use || 'Campus building'}</small></span><b>↗</b></button>) : <div className="map-search-empty">No rooms or buildings match “{search.trim()}”.</div>}</div>}</div><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
+      <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><div className="map-search-autocomplete"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} suggestionsId="map-search-results" hasSuggestions={Boolean(search.trim())} />{search.trim() && <div className="map-search-results" id="map-search-results" role="listbox">{mapSearchResults.length ? mapSearchResults.map((result) => <button type="button" role="option" key={result.type === 'room' ? `${result.building}-${result.floor}-${result.name}` : result.type === 'building' ? result.feature.properties._key : result.name} onClick={() => locateSearchResult(result)}><span className="result-icon">{result.type === 'room' ? '⌕' : '⌖'}</span><span><strong>{result.name}</strong><small>{result.type === 'room' ? getRoomLocationLabel(result) : result.type === 'building-group' ? `${result.description} · ${result.count} matching places` : result.feature.properties?.Use || 'Campus building'}</small></span><b>↗</b></button>) : <div className="map-search-empty">No rooms or buildings match “{search.trim()}”.</div>}</div>}</div><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
       <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className="tool" onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button></div>
       <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div></div>
       <button className="floorplans-fab" onClick={() => setView('floorplans')} aria-label="Open floor plans"><span className="floorplans-fab-icon">▦</span><span>Explore floor plans</span><span className="floorplans-fab-arrow">↗</span></button>
@@ -314,7 +337,7 @@ function AppHeader({ view, onChange }) {
   return <header className="app-header"><a className="brand" href="#campus" onClick={(event) => { event.preventDefault(); onChange('map'); }}><span className="brand-mark">C</span><span><strong>CST</strong><small>Campus guide</small></span></a><nav className="view-tabs" aria-label="Guide view"><button className={view === 'map' ? 'selected' : ''} onClick={() => onChange('map')}>⌖ <span>Campus map</span></button></nav></header>;
 }
 
-function FloorPlans({ initialBuildingIndex = 0 }) {
+function FloorPlans({ initialBuildingIndex = 0, initialRoom = null, onInitialRoomHandled }) {
   const [buildingIndex, setBuildingIndex] = useState(initialBuildingIndex);
   const [floorIndex, setFloorIndex] = useState(0);
   const [query, setQuery] = useState('');
@@ -336,12 +359,22 @@ function FloorPlans({ initialBuildingIndex = 0 }) {
     setActiveRoom(item);
     setQuery('');
   };
+  useEffect(() => {
+    if (!initialRoom) return;
+    if (initialRoom.type === 'building') {
+      const index = floorPlanBuildings.findIndex((item) => item.name === initialRoom.building);
+      if (index >= 0) chooseBuilding(index);
+    } else {
+      setLocation(initialRoom);
+    }
+    onInitialRoomHandled?.();
+  }, [initialRoom]);
   const selectRoom = (item) => setActiveRoom({ ...item, building: activeBuilding.name, floor: activeFloor.name });
   const chooseBuilding = (index) => { setBuildingIndex(index); setFloorIndex(0); setActiveRoom(null); };
   const roomsFor = (side) => activeFloor.rooms.filter((item) => item.side === side);
   return <section className="floor-page">
     <div className="floor-heading"><div><div className="eyebrow"><span/> CAMPUS DIRECTORY</div><h1>Find your place.</h1><p>Explore buildings, floors, departments, classrooms and labs across CST.</p></div><div className="room-count"><strong>{allPlanRooms.length}</strong><span>mapped spaces</span></div></div>
-    <div className="plan-search-wrap"><SearchIcon/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a room, lab or building…" aria-label="Search rooms, labs or buildings" aria-expanded={Boolean(normalizedQuery)} aria-controls="plan-search-results"/>{query&&<button onClick={()=>setQuery('')} aria-label="Clear search">×</button>}{normalizedQuery&&<div className="search-results" id="plan-search-results" role="listbox">{matches.length ? matches.map((item)=><button type="button" role="option" key={`${item.building}-${item.floor}-${item.name}`} onClick={()=>setLocation(item)}><span className="result-icon">⌕</span><span><strong>{item.name}</strong><small>{item.building} <i>·</i> {item.floor}</small></span><b>↗</b></button>) : <div className="search-empty">No rooms or buildings match “{query.trim()}”.</div>}</div>}</div>
+    <div className="plan-search-wrap"><SearchIcon/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search a room, lab or building…" aria-label="Search rooms, labs or buildings" aria-expanded={Boolean(normalizedQuery)} aria-controls="plan-search-results"/>{query&&<button onClick={()=>setQuery('')} aria-label="Clear search">×</button>}{normalizedQuery&&<div className="search-results" id="plan-search-results" role="listbox">{matches.length ? matches.map((item)=><button type="button" role="option" key={`${item.building}-${item.floor}-${item.name}`} onClick={()=>setLocation(item)}><span className="result-icon">⌕</span><span><strong>{item.name}</strong><small>{getRoomLocationLabel(item)}</small></span><b>↗</b></button>) : <div className="search-empty">No rooms or buildings match “{query.trim()}”.</div>}</div>}</div>
     <div className="plan-layout"><aside className="building-panel"><div className="panel-label">BUILDINGS <span>{floorPlanBuildings.length.toString().padStart(2,'0')}</span></div>{floorPlanBuildings.map((item,index)=><button className={`building-link ${index===buildingIndex?'chosen':''}`} key={item.name} onClick={()=>chooseBuilding(index)}><span className="building-glyph">{['⌂','▤','⌖','✳','▦','▧','▤','⌘','▱'][index]}</span><span className="building-link-copy"><strong>{item.name}</strong><small>{item.floors.length} {item.floors.length===1?'level':'levels'} <i>·</i> {item.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</small></span><b>›</b></button>)}</aside>
       <div className="plan-content"><div className="building-title"><div><div className="eyebrow">BUILDING OVERVIEW</div><h2>{activeBuilding.name}</h2>{activeBuilding.note&&<p>{activeBuilding.note}</p>}</div><span className="floor-badge">{activeBuilding.floors.reduce((n,f)=>n+f.rooms.length,0)} spaces</span></div>
         <div className="floor-tabs" role="tablist" aria-label="Select floor">{activeBuilding.floors.map((item,index)=><button role="tab" aria-selected={index===floorIndex} className={index===floorIndex?'active':''} key={item.name} onClick={()=>{setFloorIndex(index);setActiveRoom(null);}}>{item.name}</button>)}</div>
