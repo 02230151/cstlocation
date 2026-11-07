@@ -295,7 +295,6 @@ function FloorPlans({ initialBuildingIndex = 0 }) {
         <div className="room-photo-caption">
           <span className="details-kicker">{activeRoom.building} · {activeRoom.floor}{activeRoom.side ? ` · ${activeRoom.side === 'center' ? 'center area' : `${activeRoom.side} side`}` : ''}</span>
           <h2 id="room-photo-title">{activeRoom.name}</h2>
-          {activeRoom.description && <p>{activeRoom.description}</p>}
           {activeRoom.note && <p>{activeRoom.note}</p>}
         </div>
       </section>
@@ -304,7 +303,7 @@ function FloorPlans({ initialBuildingIndex = 0 }) {
 }
 
 function RoomTile({ item, index, active, onClick }) {
-  return <button className={`room-tile ${active?'active':''}`} onClick={()=>onClick(item)} style={{'--tile-order':index}}><span className="room-num">{String(index+1).padStart(2,'0')}</span><span className="room-tile-copy"><strong>{item.name}</strong>{item.description&&<span className="room-description">{item.description}</span>}</span><span className="tile-arrow">↗</span></button>;
+  return <button className={`room-tile ${active?'active':''}`} onClick={()=>onClick(item)} style={{'--tile-order':index}}><span className="room-num">{String(index+1).padStart(2,'0')}</span><span className="room-tile-copy"><strong>{item.name}</strong></span><span className="tile-arrow">↗</span></button>;
 }
 
 function SearchBox({ value, onChange, className, onSubmit }) {
