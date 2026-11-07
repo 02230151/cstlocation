@@ -21,6 +21,7 @@ const layerFiles = {
 const buildingPhotos = {
   'convention hall': 'convention-hall.jpg',
   'it building': 'it-building-pictures-it-building.jpg',
+  'lt 2 & 3': 'lt-2-3-building.png',
   'administrative block': 'academyblock-images-academyblock-front-view.jpg',
   classroom: 'classroom-block-courtyard.png',
   library: 'library.jpg',
