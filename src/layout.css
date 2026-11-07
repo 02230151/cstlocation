@@ -16,11 +16,22 @@ html,body,#root{width:100%;height:100%;min-height:0;overflow:hidden}
 .map-tools .tool:disabled{cursor:not-allowed;opacity:.58}
 .load-state{height:100dvh}
 .app-header{position:absolute;z-index:1200;top:16px;left:18px;display:flex;align-items:center;gap:24px;padding:8px 10px;border:1px solid #ffffffaa;border-radius:15px;background:#fffffff0;box-shadow:0 8px 24px #1e35231a;backdrop-filter:blur(14px)}
+.floor-app .app-header{position:sticky;top:12px;left:auto;width:max-content;margin:12px 0 -58px 18px;gap:12px;padding:5px 7px;border-color:#e5e9e1;border-radius:12px;box-shadow:0 4px 14px #1e352313;transition:box-shadow .18s ease,transform .18s ease}
+.floor-app .app-header:hover{transform:translateY(-1px);box-shadow:0 7px 20px #1e352320}
 .brand{display:flex;align-items:center;gap:9px;color:#19392c;text-decoration:none}
+.floor-app .brand{gap:7px;padding:2px 3px;border-radius:9px;transition:background .18s ease}
+.floor-app .brand:hover,.floor-app .brand:focus-visible{background:#edf2eb;outline:none}
+.floor-app .brand-mark{width:28px;height:28px;border-radius:9px;font-size:17px}
+.floor-app .brand strong{font-size:13px}
+.floor-app .brand small{font-size:8px}
 .brand-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#234c39;color:#e9c78a;font-family:Georgia,serif;font-size:21px;font-weight:700}
 .brand>span:last-child{display:grid;line-height:1.05}.brand strong{font-family:Georgia,serif;font-size:15px;letter-spacing:.04em}.brand small{margin-top:4px;color:#758579;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
 .view-tabs{display:flex;gap:3px;padding:3px;border-radius:11px;background:#f2f4ef}
 .view-tabs button{height:34px;padding:0 11px;border:0;border-radius:8px;background:transparent;color:#6f7b70;font-size:12px;font-weight:650;cursor:pointer;white-space:nowrap}
+.floor-app .view-tabs button{height:29px;padding:0 9px;font-size:11px;transition:background .18s ease,color .18s ease,transform .18s ease}
+.floor-app .view-tabs button:hover{background:#e6ece4;color:#244734}
+.floor-app .view-tabs button:active{transform:scale(.97)}
+.floor-app .view-tabs button:focus-visible{outline:2px solid #7b9a7e;outline-offset:2px}
 .view-tabs button.selected{background:#fff;color:#244734;box-shadow:0 2px 7px #182a1714}
 .floorplans-fab{position:absolute;z-index:1100;left:22px;bottom:22px;display:flex;align-items:center;gap:10px;min-height:50px;padding:7px 15px 7px 8px;border:1px solid #ffffffc9;border-radius:16px;background:#fffffff2;color:#254b38;box-shadow:0 8px 26px #20362825;backdrop-filter:blur(14px);font-size:12px;font-weight:700;letter-spacing:.01em;cursor:pointer;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
 .floorplans-fab:hover{transform:translateY(-2px);background:#fff;box-shadow:0 12px 30px #20362830}
