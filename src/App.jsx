@@ -22,7 +22,7 @@ const buildingPhotos = {
   'convention hall': 'convention-hall.jpg',
   'it building': 'it-building-pictures-it-building.jpg',
   'administrative block': 'academyblock-images-academyblock-front-view.jpg',
-  classroom: 'classrooms-cr1.jpg',
+  classroom: 'classroom-block-courtyard.png',
   library: 'library.jpg',
   'architecture-studio': 'architecture-department.jpg',
   guesthouse: 'guest-house.jpg',
