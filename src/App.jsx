@@ -208,12 +208,6 @@ export default function App() {
     }
   }
 
-  function showCampus() {
-    if (map.current && layers?.boundary) map.current.fitBounds(L.geoJSON(layers.boundary).getBounds(), {
-      paddingTopLeft: [12, 12], paddingBottomRight: [12, 60],
-    });
-  }
-
   function submitSearch() {
     if (visibleBuildings[0]) chooseBuilding(visibleBuildings[0]);
   }
@@ -231,11 +225,10 @@ export default function App() {
   if (!layers) return <main className="load-state"><AppHeader view={view} onChange={setView}/><div className="loader-mark">⌖</div><strong>Loading CST campus map…</strong><span>Preparing campus buildings and paths</span></main>;
 
   return <main className="app">
-    <AppHeader view={view} onChange={setView}/>
     <section className="map-shell" aria-label="Interactive CST campus map"><div className="map-canvas" ref={mapElement} />
       <div className="map-top"><div className="map-toolbar"><div className="map-search-row"><SearchBox value={search} onChange={setSearch} className="map-search" onSubmit={submitSearch} /><div className="map-pill">⌖ &nbsp;CST campus</div></div><nav className="map-categories" aria-label="Filter campus places">{categories.map((item) => <button key={item} className={`chip ${category === item ? 'active' : ''}`} onClick={() => setCategory(item)}>{item}</button>)}</nav></div></div>
-      <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className={`tool ${baseMap === 'street' ? 'active' : ''}`} onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button><button className="tool" disabled title="Directions are unavailable because no campus routing data is configured">➤ &nbsp;Directions</button></div>
-      <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div><button className="locate" onClick={showCampus}>⌖ &nbsp;Show CST campus</button></div>
+      <div className="map-tools"><button className={`tool ${baseMap === 'satellite' ? 'active' : ''}`} onClick={() => setBaseMap('satellite')}>▧ &nbsp;Satellite</button><button className="tool" onClick={() => setBaseMap('street')}>▤ &nbsp;Street map</button></div>
+      <div className="map-bottom"><div className="legend"><div className="legend-title">Map key</div><div className="legend-line"><span className="swatch"/> Buildings</div><div className="legend-line"><span className="swatch boundary"/> Campus boundary</div><div className="legend-line"><span className="swatch open-space"/> Outdoor areas</div><div className="legend-line"><span className="swatch paths"/> Paths / roads</div></div></div>
       <button className="floorplans-fab" onClick={() => setView('floorplans')} aria-label="Open floor plans"><span className="floorplans-fab-icon">▦</span><span>Explore floor plans</span><span className="floorplans-fab-arrow">↗</span></button>
       {selected && <BuildingDetailsPanel
         feature={selected}
@@ -323,7 +316,6 @@ function BuildingDetailsPanel({ feature, details, photo, isPhotoPreview, onPhoto
     <p className="details-description">{details.description}</p>
     <section className="details-photo-section" aria-label="Building photograph">
       {photo ? <img className="details-photo" src={photo} alt={`${name} building`} /> : <div className="photo-placeholder"><span className="photo-icon">▧</span><strong>Building photo</strong><span>Photo space reserved for this building</span></div>}
-      <label className="photo-upload">{photo ? 'Change photo' : 'Choose photo'}<input type="file" accept="image/*" onChange={onPhotoChange} /></label>
       <span className="photo-note">{isPhotoPreview ? 'Preview only · not saved after this session' : photo ? 'Campus photo' : 'Preview only · not saved after this session'}</span>
     </section>
   </aside>;
