@@ -326,20 +326,6 @@ function BuildingDetailsPanel({ feature, details, photo, isPhotoPreview, onPhoto
       <label className="photo-upload">{photo ? 'Change photo' : 'Choose photo'}<input type="file" accept="image/*" onChange={onPhotoChange} /></label>
       <span className="photo-note">{isPhotoPreview ? 'Preview only · not saved after this session' : photo ? 'Campus photo' : 'Preview only · not saved after this session'}</span>
     </section>
-    <section className="floor-plan-section">
-      <div className="details-section-heading"><div><span className="details-kicker">Room layout</span><h3>Floor plan</h3></div><span className="plan-badge">Text layout</span></div>
-      {details.floors?.length ? <div className="floor-list">{details.floors.map((item) => <article className="floor-card" key={item.name}>
-        <h4>{item.name}</h4>
-        {item.zones.length ? <div className="floor-zones">{item.zones.map((itemZone) => <div className="floor-zone" key={itemZone.side}>
-          <span className="zone-label">{itemZone.side}</span>
-          <div className="room-grid">{itemZone.rooms.map((room) => <RoomBlock key={room} name={room}/>)}</div>
-        </div>)}</div> : <p className="plan-missing">Floor or room details were not included in the supplied notes.</p>}
-      </article>)}</div> : <div className="plan-empty"><strong>Floor plan details to add</strong><span>Add the floor names, room numbers, and left/right or section layout here.</span></div>}
-      {details.areaFacilities && <div className="area-facilities"><h4>Facilities noted near the football ground</h4><p>Floor and host-building assignments were not specified.</p><div className="room-grid">{details.areaFacilities.map((item) => <RoomBlock key={item} name={item}/>)}</div></div>}
-    </section>
   </aside>;
 }
 
-function RoomBlock({ name }) {
-  return <span className="room-block"><strong>{name}</strong></span>;
-}
