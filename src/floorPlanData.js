@@ -45,7 +45,6 @@ const roomPhotoSources = {
   'HF Hostel': 'hf.jpg',
   'Hostel A': 'hostelA.jpg',
   'NK Hostel': 'nk.jpg',
-  'Lhawang Hostel': 'lhawang.jpg',
   'Chemistry lab 02': 'Chemistry_lab_02_left.jpg',
   'Chemistry lab 01': 'Chemistry_lab_01_right.jpg',
   'Physics lab': 'Physics lab (right).jpg',
@@ -53,8 +52,8 @@ const roomPhotoSources = {
   'Environmental lab': 'Environmental lab(left).jpg',
   'College cafeteria': 'Canteen.jpg',
   'Civil Engineering Department': 'AcademyBlock_images/CivilDepartment_firstfloor.jpg',
-  'ICT and Statistics Department': 'AcademyBlock_images/ICTandEstate.jpg',
-  'Instrumentation and Control Engineering Department': 'AcademyBlock_images/ECEdepartment_middefloor.jpg',
+  'ICT and Estate': 'AcademyBlock_images/ICTandEstate.jpg',
+  'Electronics and Communication Engineering Department': 'AcademyBlock_images/ECEdepartment_middefloor.jpg',
   'Science and Humanities Department': 'AcademyBlock_images/ScienceAndHumanity_Department_middlefloor.jpg',
   'Electrical Engineering Department': 'AcademyBlock_images/ElectricalDepartment_topfloor.jpg',
   'Administrative Section': 'AcademyBlock_images/AdministrationSection_presidentoffice_choesham.jpg',
@@ -162,8 +161,8 @@ export const floorPlanBuildings = [
   ]),
   building('Administrative Block', [
     floor('Ground floor', [room('College cafeteria', 'center', 'Meals and refreshments for students and staff.')]),
-    floor('First floor', [room('Civil Engineering Department', 'right'), room('ICT and Statistics Department', 'left')]),
-    floor('Second floor', [room('Instrumentation and Control Engineering Department', 'right'), room('Science and Humanities Department', 'left')]),
+    floor('First floor', [room('Civil Engineering Department', 'right'), room('ICT and Estate', 'left')]),
+    floor('Second floor', [room('Electronics and Communication Engineering Department', 'right'), room('Science and Humanities Department', 'left')]),
     floor('Third floor', [room('Electrical Engineering Department', 'left'), room('Administrative Section', 'right'), room("President's Office", 'right'), room('Integrity Hall', 'right'), room('Prayer Hall (Chue Khang)', 'right')]),
   ], 'Academic departments, administration, and student facilities.'),
   building('Classroom Block', [
@@ -180,7 +179,7 @@ export const floorPlanBuildings = [
     floor('Hostel photos', [
       room('RK-A Hostel'), room('RK-B Hostel'), room('HB Hostel'), room('HC Hostel'),
       room('HD Hostel'), room('HE Hostel'), room('HF Hostel'), room('NK Hostel'),
-      room('Hostel A'), room('Lhawang Hostel'),
+      room('Hostel A'),
     ], 'These photos identify hostel buildings only; room locations and floor layouts were not provided.'),
   ], 'Hostel buildings on the CST campus.'),
 ];

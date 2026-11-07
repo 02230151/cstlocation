@@ -61,12 +61,12 @@ export const buildingDetails = {
     floors: [
       floor('Ground floor', [zone('Rooms listed', ['College cafeteria'])]),
       floor('First floor', [
-        zone('Left side', ['ICT and Statistics Department']),
+        zone('Left side', ['ICT and Estate']),
         zone('Right side', ['Civil Engineering Department']),
       ]),
       floor('Second floor', [
         zone('Left side', ['Science and Humanities Department']),
-        zone('Right side', ['Instrumentation and Control Engineering Department']),
+        zone('Right side', ['Electronics and Communication Engineering Department']),
       ]),
       floor('Third floor', [
         zone('Left side', ['Electrical Engineering Department']),
