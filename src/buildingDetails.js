@@ -24,7 +24,7 @@ export const buildingDetails = {
     ],
   },
   'classroom': {
-    description: 'The Classroom Building is situated next to the Academic Block. It contains classrooms ranging from CR01 to CR13 and also accommodates the Teamwork Hall and GNH Hall.',
+    description: 'The Classroom Building is situated next to the Academic Block and provides teaching rooms ranging from CR01 to CR13. It also accommodates the Teamwork Hall and GNH Hall.',
     floors: [
       floor('Ground floor', [
         zone('Left side', ['CR01', 'CR02', 'CR03', 'CR04', 'CR05', 'CR06']),
