@@ -2,6 +2,18 @@ const floor = (name, zones) => ({ name, zones });
 const zone = (side, rooms) => ({ side, rooms });
 
 export const buildingDetails = {
+  'lh': {
+    description: 'The Lecture Hall (LH) is located beside the FabLab and near the football ground. It serves as a venue for lectures, seminars, and academic events.',
+    floors: [],
+  },
+  'old chem lab': {
+    description: "The Old Chemistry Lab is located below the Gymnasium. It is currently being used as a girls' hostel.",
+    floors: [],
+  },
+  'convention hall': {
+    description: 'The Convention Hall is located below the IT Building and the Academic Block. It is used for conferences, meetings, and institutional events.',
+    floors: [],
+  },
   'library': {
     description: 'A campus library building that also contains student services, training, and academic spaces.',
     floors: [
@@ -12,7 +24,7 @@ export const buildingDetails = {
     ],
   },
   'classroom': {
-    description: 'The Classroom Block provides general teaching rooms and the Engineering Mechanics Laboratory.',
+    description: 'The Classroom Building is situated next to the Academic Block and provides teaching rooms ranging from CR01 to CR13. It also accommodates the Teamwork Hall and GNH Hall.',
     floors: [
       floor('Ground floor', [
         zone('Left side', ['CR01', 'CR02', 'CR03', 'CR04', 'CR05', 'CR06']),
@@ -57,7 +69,7 @@ export const buildingDetails = {
     ],
   },
   'administrative block': {
-    description: 'The Academy Block brings together academic departments, college administration, and student facilities across four floors.',
+    description: "The Academic Block is located beside the Classroom Building and serves as the main academic building on campus. It consists of four floors and houses most departmental offices, including the President's Office.",
     floors: [
       floor('Ground floor', [zone('Rooms listed', ['College cafeteria'])]),
       floor('First floor', [
@@ -75,9 +87,23 @@ export const buildingDetails = {
     ],
   },
   'lt 2 & 3': {
-    description: 'The LT Block contains two adjacent lecture rooms. The supplied notes do not specify their floor.',
-    floors: [floor('Floor not specified', [zone('Left side', ['LT02']), zone('Right side', ['LT03'])])],
+    description: 'LT-02 and LT-03 are situated adjacent to the IT Building. These two lecture theatres are located side by side, with LT-02 on the right and LT-03 on the left.',
+    floors: [floor('Classrooms', [zone('Left side', ['LT03']), zone('Right side', ['LT02'])])],
   },
+  'indoor stadium': {
+    description: 'The Indoor Stadium is located below the football ground. It includes a gymnasium and a basketball court, providing facilities for sports and fitness activities.',
+    floors: [],
+  },
+  'rk-a': { description: 'RK-A is a four-storey boys’ hostel that provides accommodation for male students.', floors: [] },
+  'rk-b': { description: 'RK-B is a four-storey boys’ hostel that provides accommodation for male students.', floors: [] },
+  'nk': {
+    description: "NK is a four-storey boys' hostel located below the Lecturer's Quarters, offering residential facilities for male students.",
+    floors: [],
+  },
+  'hc-hd': { description: 'HC and HD are three-storey girls’ hostels that provide accommodation for female students.', floors: [] },
+  'ha-hb': { description: 'HA and HB are three-storey boys’ hostels located beside the Architecture Building.', floors: [] },
+  'hf': { description: 'HF is a three-storey girls’ hostel situated near the Mess Building.', floors: [] },
+  'he & mess': { description: 'HE is a boys’ hostel located above the Mess Building and provides residential accommodation for male students.', floors: [] },
   'lab': {
     description: 'The map marks this as a laboratory building. Supplied notes list additional laboratories in the area near the football ground, but do not identify their host building or floors.',
     areaFacilities: ['Structure Timber Testing', 'StarC Lab', 'Rock Mechanics Lab', 'Power Electronics and Control System Laboratory', 'Hydraulics and Plumbing Lab', 'ME Workshop', 'Electrical Workshop Testing Lab', 'Electrical Machine and Instrumentation Laboratory', 'Construction Lab', 'Civil Engineering Soil Mechanics Lab', 'Civil Engineering Material Testing Lab', 'Carpentry Workshop'],
