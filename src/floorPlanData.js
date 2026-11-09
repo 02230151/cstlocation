@@ -172,7 +172,7 @@ export const floorPlanBuildings = [
   building('IT Building', [
     floor('Ground floor', [room('Programming Lab 1', 'left'), room('InnoTech Hall', 'left'), ...['IT01', 'IT02', 'IT03', 'Programming Lab 2', 'Programming Lab 3', 'Simulation Lab', 'BYOD Lab'].map((name) => room(name, 'right'))]),
     floor('First floor', [room('NLP Lab', 'left'), room('IT Head of Department (HOD) Office', 'left'), ...['IT04', 'IT05', 'Data Science Lab', 'OSS Lab', 'Software Lab', 'Database Lab'].map((name) => room(name, 'right'))]),
-    floor('Second floor', [room('IT06', 'left'), room('Tech Innovation Hall', 'right'), room('Tech Conference Halls', 'right'), room("IT Lab Technician's Office", 'right')], 'Top floor.'),
+    floor('Top floor', [room('IT06', 'left'), room('Tech Innovation Hall', 'right'), room('Tech Conference Halls', 'right'), room("IT Lab Technician's Office", 'right')]),
   ], 'Above the Convention Hall, below the Classroom Block, and adjacent to the Administrative Block.'),
   building('LT Block', [floor('Classrooms', [room('LT02', 'left'), room('LT03', 'right')], 'The two classrooms are side by side. Floor level was not specified.')], 'Adjacent to the IT Building and below the Classroom Block.'),
   building('Hostel Block', [

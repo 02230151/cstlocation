@@ -48,7 +48,7 @@ export const buildingDetails = {
         zone('Right side', ['IT04', 'IT05', 'Data Science Lab', 'OSS Lab', 'Software Lab', 'Database Lab']),
         zone('Left side', ['NLP Lab', 'IT HOD Office']),
       ]),
-      floor('Second floor', [zone('Rooms listed', ['IT06', 'Tech Innovation Hall', 'Tech Conference Halls', 'IT Lab Technician’s Office'])]),
+      floor('Top floor', [zone('Rooms listed', ['IT06', 'Tech Innovation Hall', 'Tech Conference Halls', 'IT Lab Technician’s Office'])]),
     ],
   },
   'fab-lab': {
